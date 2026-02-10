@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: artech-user-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: artech_user
+      MYSQL_USER: artech
+      MYSQL_PASSWORD: artech123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - artech-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: artech-user-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - artech-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: artech-user-app
+    restart: unless-stopped
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: artech_user
+      JWT_SECRET: your-secret-key-change-this-in-production
+      JWT_ACCESS_TOKEN_DURATION: 15m
+      JWT_REFRESH_TOKEN_DURATION: 168h
+      LOG_LEVEL: info
+      LOG_FILE_PATH: logs/app.log
+      APP_NAME: Artech User Service
+      APP_ENV: production
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - artech-network
+    volumes:
+      - app_logs:/app/logs
+    command: sh -c "./migrate up && ./server start"
+
+volumes:
+  mysql_data:
+    driver: local
+  app_logs:
+    driver: local
+
+networks:
+  artech-network:
+    driver: bridge
