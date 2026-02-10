@@ -2,7 +2,6 @@ package email
 
 import (
 	"fmt"
-	"net/smtp"
 )
 
 // EmailSender handles email sending operations
