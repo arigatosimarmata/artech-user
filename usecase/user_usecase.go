@@ -2,7 +2,8 @@ package usecase
 
 import (
 	"context"
-	"fmt"
+	"crypto/rand"
+	"encoding/hex"
 	"strconv"
 	"time"
 
@@ -365,8 +366,13 @@ func (u *userUsecase) ForgotPassword(ctx context.Context, req *request.ForgotPas
 		return domain.ErrDatabaseError
 	}
 
-	// Generate reset token (simple random string for now)
-	resetToken := fmt.Sprintf("%d-%d", user.ID, time.Now().Unix())
+	// Generate secure reset token using crypto/rand
+	tokenBytes := make([]byte, 32)
+	if _, err := rand.Read(tokenBytes); err != nil {
+		u.logger.Error("failed to generate secure token", zap.Error(err))
+		return domain.ErrInternalServer
+	}
+	resetToken := hex.EncodeToString(tokenBytes)
 
 	// Store reset token
 	passwordResetToken := &domain.PasswordResetToken{

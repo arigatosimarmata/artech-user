@@ -1,7 +1,12 @@
 #!/bin/bash
 
+# ============================================================================
 # API Testing Script for Artech User Service
-# This script tests all available endpoints
+# 
+# WARNING: This script uses hardcoded test credentials and should NEVER be
+# used with production data or production environments. Only use for local
+# development and testing purposes.
+# ============================================================================
 
 BASE_URL="http://localhost:8080"
 

@@ -61,9 +61,8 @@ func (s *EmailSender) SendWelcomeEmail(to, fullName string) error {
 
 // sendEmail sends an email using SMTP
 func (s *EmailSender) sendEmail(to, subject, body string) error {
-	// For development, just log the email instead of actually sending it
+	// For development, email is not actually sent
 	// In production, implement actual SMTP sending
-	fmt.Printf("Sending email to %s\nSubject: %s\nBody: %s\n", to, subject, body)
 	
 	// Actual SMTP implementation (commented out for development):
 	/*

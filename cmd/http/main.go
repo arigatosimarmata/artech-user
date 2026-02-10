@@ -102,11 +102,15 @@ func runServer(cmd *cobra.Command, args []string) error {
 
 	// Global middleware
 	app.Use(recover.New())
+	
+	// CORS - Should be restricted in production
+	// TODO: Replace "*" with specific allowed origins in production
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 		AllowMethods: "GET, POST, PUT, DELETE, OPTIONS",
 	}))
+	
 	app.Use(middleware.LoggingMiddleware(log))
 
 	// Health check endpoint

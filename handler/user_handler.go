@@ -111,7 +111,23 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 // @Failure 500 {object} response.ErrorResponse
 // @Router /api/v1/auth/logout [post]
 func (h *UserHandler) Logout(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(int64)
+	userIDValue := c.Locals("user_id")
+	if userIDValue == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+			Success: false,
+			Error:   "unauthorized",
+			Message: "User ID not found in context",
+		})
+	}
+	
+	userID, ok := userIDValue.(int64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+			Success: false,
+			Error:   "unauthorized",
+			Message: "Invalid user ID in context",
+		})
+	}
 	
 	// Extract access token from header
 	authHeader := c.Get("Authorization")
@@ -241,7 +257,23 @@ func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
 // @Failure 500 {object} response.ErrorResponse
 // @Router /api/v1/user/profile [get]
 func (h *UserHandler) GetProfile(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(int64)
+	userIDValue := c.Locals("user_id")
+	if userIDValue == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+			Success: false,
+			Error:   "unauthorized",
+			Message: "User ID not found in context",
+		})
+	}
+	
+	userID, ok := userIDValue.(int64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+			Success: false,
+			Error:   "unauthorized",
+			Message: "Invalid user ID in context",
+		})
+	}
 
 	userResp, err := h.userUsecase.GetProfile(c.Context(), userID)
 	if err != nil {

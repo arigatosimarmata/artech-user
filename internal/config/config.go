@@ -75,6 +75,13 @@ type AppConfig struct {
 func Load() (*Config, error) {
 	// Load .env file if exists
 	_ = godotenv.Load()
+	
+	// Validate JWT secret in production
+	jwtSecret := getEnv("JWT_SECRET", "your-secret-key-change-this-in-production")
+	appEnv := getEnv("APP_ENV", "development")
+	if appEnv == "production" && (jwtSecret == "your-secret-key-change-this-in-production" || len(jwtSecret) < 32) {
+		return nil, fmt.Errorf("JWT_SECRET must be set to a secure value (minimum 32 characters) in production")
+	}
 
 	config := &Config{
 		Server: ServerConfig{
@@ -94,7 +101,7 @@ func Load() (*Config, error) {
 			ConnMaxLifetime: getDurationEnv("DB_CONN_MAX_LIFETIME", 300) * time.Second,
 		},
 		JWT: JWTConfig{
-			Secret:                 getEnv("JWT_SECRET", "your-secret-key-change-this-in-production"),
+			Secret:                 jwtSecret,
 			AccessTokenDuration:    parseDuration(getEnv("JWT_ACCESS_TOKEN_DURATION", "15m"), 15*time.Minute),
 			RefreshTokenDuration:   parseDuration(getEnv("JWT_REFRESH_TOKEN_DURATION", "168h"), 168*time.Hour),
 		},
